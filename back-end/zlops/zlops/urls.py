@@ -61,7 +61,7 @@ urlpatterns = [
     # 文件库
     path('api/file/', include(router.urls)),
     # 服务监控
-    # path('api/monitor/', include('apps.monitor.urls')),
+    path('api/monitor/', include('apps.monitor.urls')),
 
     # 前端页面入口
     path('',TemplateView.as_view(template_name="index.html"))

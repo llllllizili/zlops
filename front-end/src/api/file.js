@@ -16,3 +16,11 @@ export function getFileList(query) {
     params: query
   })
 }
+
+export function deleteFile(id, data) {
+  return request({
+    url: `/file/${id}/`,
+    method: 'delete',
+    data
+  })
+}

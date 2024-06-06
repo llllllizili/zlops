@@ -40,15 +40,14 @@
           <el-button 
           type="primary" 
           size="small"
+          :disabled="!checkPermission(['file_upload'])"
           @click="centerDialogVisible = true"
           >文件上传</el-button>
 
-
-
           <el-dialog
-                title="提示"
+                title="自动上传"
                 :visible.sync="centerDialogVisible"
-                width="29%"
+                width="26%"
                 center>
             <el-upload
               class="upload-demo"
@@ -56,17 +55,19 @@
               :action="upUrl"
               :file-list="fileList"
               :show-file-list="true"
-              :auto-upload="false"
-              :on-success="handleAvatarSuccess"
+              :auto-upload="true"
+              :on-success="handleFileUploadSuccess"
+              :before-upload="beforeAvatarUpload"
+              :on-error="handleFileUploadError"
               :headers="upHeaders"
               multiple>
               <i class="el-icon-upload"></i>
               <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
             </el-upload>
-            <span slot="footer" class="dialog-footer">
+            <!-- <span slot="footer" class="dialog-footer">
                   <el-button @click="centerDialogVisible = false">取 消</el-button>
                   <el-button type="primary" @click="centerDialogVisible = false">确 定</el-button>
-                </span>
+            </span> -->
           </el-dialog>
         </div>
         <el-table
@@ -83,7 +84,12 @@
           <el-table-column type="index" width="50" />
           <el-table-column align="center" label="名称">
             <template slot-scope="scope">
-                <el-link type="primary" :href="scope.row.file" target="_blank">{{ scope.row.name }}</el-link>
+                <el-link
+                type="primary"
+                :disabled="!checkPermission(['file_view'])"
+                :href="scope.row.file"
+                target="_blank">{{ scope.row.name }}
+              </el-link>
             </template>
           </el-table-column>
           <el-table-column align="header-center" label="类型">
@@ -103,6 +109,17 @@
               <span>{{ scope.row.create_time }}</span>
             </template>
           </el-table-column>
+          <el-table-column align="center" label="操作">
+        <template slot-scope="scope">
+          <el-button
+            type="danger"
+            size="small"
+            icon="el-icon-delete"
+            :disabled="!checkPermission(['file_delete'])"
+            @click="handleDelete(scope)"
+          />
+        </template>
+      </el-table-column>
         </el-table>
 
         <pagination
@@ -115,8 +132,10 @@
   </div>
 </template>
 <script>
-import { getFileList,upUrl, upHeaders } from "@/api/file"
+import { getFileList,upUrl, upHeaders, deleteFile } from "@/api/file"
 import Pagination from "@/components/Pagination"
+import checkPermission from "@/utils/permission"
+
 export default {
   components: { Pagination },
   data() {
@@ -143,6 +162,21 @@ export default {
     this.getList();
   },
   methods: {
+    checkPermission,
+    handleFileUploadSuccess() {
+      this.getList();
+      this.$message.success("上传成功")
+    },
+    handleFileUploadError() {
+      this.$message.error("上传失败")
+    },
+    beforeAvatarUpload(file) {
+      const isLt5M = file.size / 1024 / 1024 < 5;
+      if (!isLt5M) {
+        this.$message.error("上传文件不能超过5MB!");
+      }
+      return isLt5M;
+    },
     getList() {
       this.listLoading = true;
       getFileList(this.listQuery).then(response => {
@@ -162,6 +196,24 @@ export default {
     handleFilter() {
       this.listQuery.page = 1;
       this.getList();
+    },
+    handleDelete(scope) {
+      this.$confirm("确认删除?", "警告", {
+        confirmButtonText: "确认",
+        cancelButtonText: "取消",
+        type: "error",
+      })
+        .then(async () => {
+          await deleteFile(scope.row.id);
+          this.getList();
+          this.$message({
+            type: "success",
+            message: "成功删除!",
+          });
+        })
+        .catch((err) => {
+          console.error(err);
+        });
     },
   }
 };
