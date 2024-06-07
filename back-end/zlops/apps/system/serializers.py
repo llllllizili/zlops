@@ -162,7 +162,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username', 'name', 'phone', 'email', 'dept',
-                  'position', 'avatar', 'is_active', 'roles']
+                  'position', 'avatar', 'is_active', 'roles','superior']
 
     def validate_username(self, username):
         if User.objects.filter(username=username):

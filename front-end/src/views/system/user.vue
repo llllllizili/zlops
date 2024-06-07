@@ -4,7 +4,7 @@
       <el-col :md="6">
         <el-card>
           <div slot="header" class="clearfix">
-    <span>部门</span>
+    <span>组织</span>
   </div>
         <el-input v-model="filterOrgText" placeholder="输入部门名进行过滤" />
 
@@ -64,9 +64,14 @@
             @click="resetFilter"
             size="small"
           >重置</el-button>
-        </div>
-        <div style="margin-top:6px">
-          <el-button type="primary" icon="el-icon-plus" @click="handleAddUser" v-if="checkPermission(['user_create'])" size="small">新增</el-button>
+          <el-button
+          type="primary"
+          icon="el-icon-plus"
+          @click="handleAddUser"
+          v-if="checkPermission(['user_create'])"
+          size="small"
+          >新增</el-button>
+
         </div>
         <el-table
           v-loading="listLoading"
@@ -97,6 +102,12 @@
               <span>{{ scope.row.date_joined }}</span>
             </template>
           </el-table-column>
+          <!-- <el-table-column align="header-center" label="状态"  width="60">
+          <template slot-scope="scope">
+            <span v-if="scope.row.is_active" >激活</span>
+            <span v-if="!scope.row.is_active" >冻结</span>
+          </template>
+          </el-table-column> -->
           <el-table-column align="center" label="操作">
             <template slot-scope="scope">
               <el-button
@@ -138,8 +149,14 @@
         <el-form-item label="账户" prop="username">
           <el-input v-model="user.username" placeholder="账户" />
         </el-form-item>
+        <el-form-item label="密码" prop="password">
+          <el-input v-model="user.password" placeholder="密码" />
+        </el-form-item>
         <el-form-item label="所属部门" prop="dept">
-          <treeselect v-model="user.dept" :multiple="false" :options="orgData" placeholder="所属部门"/>
+          <treeselect v-model="user.dept" :multiple="false" :options="orgData" @select="handleParentChange" placeholder="所属部门"/>
+        </el-form-item>
+        <el-form-item label="上级主管" prop="superior">
+          <treeselect v-model="user.superior" :multiple="false" :options="deptUserData" placeholder="上级主管"/>
         </el-form-item>
         <el-form-item label="角色" prop="roles">
           <el-select v-model="user.roles" multiple placeholder="请选择" style="width:100%">
@@ -212,8 +229,9 @@ const defaultUser = {
   id: "",
   name: "",
   username: "",
+  password: "",
   dept: null,
-  avatar: "/media/avatar.png"
+  // avatar: "/media/avatar.png"
 };
 export default {
   components: { Pagination, Treeselect },
@@ -237,14 +255,13 @@ export default {
       dialogType: "new",
       rule1: {
         name: [{ required: true, message: "请输入姓名", trigger: "blur" }],
-        username: [{ required: true, message: "请输入账号", trigger: "change" }]
-        // password: [
-        //   { required: true, message: '请输入密码', trigger: 'change' }
-        // ],
+        username: [{ required: true, message: "请输入账号", trigger: "change" }],
+        // password: [{ required: true, message: '请输入密码', trigger: 'change' }],
       },
       filterOrgText: "",
       treeLoding: false,
-      orgData: []
+      orgData: [],
+      deptUserData: []
     };
   },
   computed: {},
@@ -286,6 +303,11 @@ export default {
           this.userList = response.data
         }
         this.listLoading = false;
+      });
+    },
+    handleParentChange(value){
+      getUserList({"dept":value.id}).then(response => {
+      this.deptUserData = genTree(response.data.results);
       });
     },
     getOrgAll() {
@@ -335,15 +357,17 @@ export default {
       })
         .then(async () => {
           await deleteUser(scope.row.id);
-          this.userList.splice(scope.row.index, 1);
+          // this.userList.splice(scope.row.index, 1);
+          this.getList();
+
           this.$message({
             type: "success",
             message: "成功删除!"
-          });
-        })
-        .catch(err => {
-          console.error(err);
         });
+      })
+      .catch(err => {
+        console.error(err);
+      });
     },
     async confirm(form) {
       this.$refs[form].validate(valid => {

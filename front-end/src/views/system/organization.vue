@@ -126,7 +126,7 @@ export default {
       dialogType: "new",
       rule1: {
         name: [{ required: true, message: "请输入名称", trigger: "blur" }],
-        parent: [{ required: true, message: "请选择上级", trigger: "change" }],
+        // parent: [{ required: true, message: "请选择上级", trigger: "change" }],
       },
     };
   },

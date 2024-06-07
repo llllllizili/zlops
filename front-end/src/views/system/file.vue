@@ -40,7 +40,7 @@
           <el-button 
           type="primary" 
           size="small"
-          :disabled="!checkPermission(['file_upload'])"
+          v-if="checkPermission(['user_create'])"
           @click="centerDialogVisible = true"
           >文件上传</el-button>
 
@@ -115,7 +115,7 @@
             type="danger"
             size="small"
             icon="el-icon-delete"
-            :disabled="!checkPermission(['file_delete'])"
+            v-if="checkPermission(['user_create'])"
             @click="handleDelete(scope)"
           />
         </template>
