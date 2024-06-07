@@ -2,7 +2,7 @@ unpackage/dist/*
 .idea/
 .vscode/
 server/static/
-
+migrations/
 .DS_Store
 node_modules/
 media/

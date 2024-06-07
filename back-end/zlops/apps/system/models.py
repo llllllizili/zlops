@@ -9,7 +9,7 @@ from simple_history.models import HistoricalRecords
 
 
 
-class Position(BaseModel):
+class Position(SoftModel):
     """
     职位/岗位
     """

@@ -153,7 +153,7 @@
           <el-input v-model="user.password" placeholder="密码" />
         </el-form-item>
         <el-form-item label="所属部门" prop="dept">
-          <treeselect v-model="user.dept" :multiple="false" :options="orgData" @select="handleParentChange" placeholder="所属部门"/>
+          <treeselect v-model="user.dept" :multiple="false" :options="orgData" @select="handleSuperiorList" placeholder="所属部门"/>
         </el-form-item>
         <el-form-item label="上级主管" prop="superior">
           <treeselect v-model="user.superior" :multiple="false" :options="deptUserData" placeholder="上级主管"/>
@@ -162,6 +162,18 @@
           <el-select v-model="user.roles" multiple placeholder="请选择" style="width:100%">
             <el-option
               v-for="item in roles"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+          <!-- <treeselect v-model="user.superior" :multiple="true" :options="roles" placeholder="上级主管"/> -->
+        </el-form-item>
+        <el-form-item label="岗位" prop="position">
+          <!-- <treeselect v-model="user.position" :multiple="true" :options="positionData" placeholder="岗位"/> -->
+          <el-select v-model="user.position" multiple placeholder="请选择" style="width:100%">
+            <el-option
+              v-for="item in positionData"
               :key="item.value"
               :label="item.label"
               :value="item.value"
@@ -218,6 +230,7 @@
 <script>
 import { getUserList, createUser, deleteUser, updateUser } from "@/api/user";
 import { getOrgAll } from "@/api/org"
+import { getPositionAll } from "@/api/position"
 import { getRoleAll } from "@/api/role"
 import { genTree } from "@/utils"
 import checkPermission from "@/utils/permission"
@@ -261,7 +274,8 @@ export default {
       filterOrgText: "",
       treeLoding: false,
       orgData: [],
-      deptUserData: []
+      deptUserData: [],
+      positionData: []
     };
   },
   computed: {},
@@ -274,6 +288,7 @@ export default {
     this.getList();
     this.getOrgAll();
     this.getRoleAll();
+    this.getPositionAll();
   },
   methods: {
     checkPermission,
@@ -305,7 +320,7 @@ export default {
         this.listLoading = false;
       });
     },
-    handleParentChange(value){
+    handleSuperiorList(value){
       getUserList({"dept":value.id}).then(response => {
       this.deptUserData = genTree(response.data.results);
       });
@@ -318,8 +333,17 @@ export default {
       });
     },
     getRoleAll() {
+      this.treeLoding = true;
       getRoleAll().then(response => {
         this.roles = genTree(response.data);
+        this.treeLoding = false;
+      });
+    },
+    getPositionAll() {
+      this.treeLoding = true;
+      getPositionAll().then(response => {
+        this.positionData = genTree(response.data);
+        this.treeLoding = false;
       });
     },
     resetFilter() {
