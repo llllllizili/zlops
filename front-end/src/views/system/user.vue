@@ -97,9 +97,22 @@
               slot-scope="scope"
             >{{ scope.row.dept_name }}</template>
           </el-table-column>
+          <el-table-column align="header-center" label="角色">
+            <template
+              v-if="scope.row.roles_name  != null"
+              slot-scope="scope"
+            >{{ scope.row.roles_name.join(', ') }}            
+          </template>
+          </el-table-column>
+          <el-table-column align="header-center" label="上级主管">
+            <template
+              v-if="scope.row.superior_name != null"
+              slot-scope="scope"
+            >{{ scope.row.superior_name }}</template>
+          </el-table-column>
           <el-table-column label="创建日期">
             <template slot-scope="scope">
-              <span>{{ scope.row.date_joined }}</span>
+              <span>{{ scope.row.date_joined | formatDate}}</span>
             </template>
           </el-table-column>
           <!-- <el-table-column align="header-center" label="状态"  width="60">
@@ -156,7 +169,7 @@
           <treeselect v-model="user.dept" :multiple="false" :options="orgData" @select="handleSuperiorList" placeholder="所属部门"/>
         </el-form-item>
         <el-form-item label="上级主管" prop="superior">
-          <treeselect v-model="user.superior" :multiple="false" :options="deptUserData" placeholder="上级主管"/>
+          <treeselect v-model="user.superior" :multiple="false" :options="deptUserData"  placeholder="上级主管"/>
         </el-form-item>
         <el-form-item label="角色" prop="roles">
           <el-select v-model="user.roles" multiple placeholder="请选择" style="width:100%">
@@ -180,6 +193,11 @@
             />
           </el-select>
         </el-form-item>
+        <!-- <el-form-item label="创建日期" prop="date">
+          <template slot-scope="scope">
+            <span>{{ user.date_joined}}</span>
+          </template>
+        </el-form-item> -->
         <el-form-item label="头像" prop="dept">
           <el-upload
             class="avatar-uploader"
@@ -289,6 +307,16 @@ export default {
     this.getOrgAll();
     this.getRoleAll();
     this.getPositionAll();
+  },
+  filters: {
+    formatDate(value) {
+      if (!value) return '';
+        const date = new Date(value);
+        const year = date.getFullYear();
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const day = date.getDate().toString().padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
   },
   methods: {
     checkPermission,

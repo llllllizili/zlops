@@ -120,11 +120,14 @@ class UserListSerializer(serializers.ModelSerializer):
     用户列表序列化
     """
     dept_name = serializers.StringRelatedField(source='dept')
+    superior_name = serializers.StringRelatedField(source='superior')
     roles_name = serializers.StringRelatedField(source='roles', many=True)
     class Meta:
         model = User
         fields = ['id', 'name', 'phone', 'email', 'position',
-                  'username', 'is_active', 'date_joined', 'dept_name', 'dept', 'roles', 'avatar', 'roles_name']
+                  'username', 'is_active', 'date_joined', 
+                  'dept_name', 'dept', 'roles', 'avatar', 
+                  'superior_name','roles_name']
 
     @staticmethod
     def setup_eager_loading(queryset):
