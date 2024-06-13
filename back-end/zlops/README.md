@@ -12,7 +12,6 @@ pip install -r requirements.txt -i https://mirror.baidu.com/pypi/simple
 
 
 
-python manage.py makemigrations system
 python manage.py makemigrations
 python manage.py migrate
 

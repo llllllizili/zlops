@@ -83,19 +83,19 @@ export const asyncRoutes = [
     component: Layout,
     redirect: '/workflow/index',
     name: 'workflow',
-    meta: { title: '工作流', icon: 'example', perms: ['workflow_manage']  },
+    meta: { title: '工作流', icon: 'example', perms: ['workflow_index']  },
     children: [
       {
         path: 'index',
         name: 'index',
         component: () => import('@/views/workflow/index'),
-        meta: { title: '工作流', icon: 'example', perms: ['workflow_index'] }
+        meta: { title: '流程管理', icon: 'example', perms: ['workflow_manage'] }
       },
       {
         path: 'ticket',
         name: 'ticket',
         component: () => import('@/views/workflow/ticket'),
-        meta: { title: '工单管理', icon: 'example' ,noCache: true, perms: ['workflow_ticket'] },
+        meta: { title: '工单管理', icon: 'example' ,noCache: true, perms: ['ticket_manage'] },
       },
       {
         path: 'workFlowTickets',
