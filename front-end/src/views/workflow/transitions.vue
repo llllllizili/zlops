@@ -35,6 +35,13 @@
             }}</span>
           </template>
         </el-table-column>
+        <el-table-column width="180" label="属性类型">
+          <template slot-scope="scope">
+            <span v-if="scope.row.attribute_type"
+              >{{ getStatusText(scope.row.attribute_type) }}
+            </span>
+          </template>
+        </el-table-column>
         <el-table-column width="180" label="创建时间">
           <template slot-scope="scope">{{ scope.row.create_time }}</template>
         </el-table-column>
@@ -150,6 +157,8 @@ import {
 import checkPermission from "@/utils/permission";
 import vueJsonEditor from "vue-json-editor";
 import { genTree } from "@/utils";
+import { TRANSITION_ATTRIBUTE_TYPE } from "@/constants/Constants.js";
+
 const defaultwftransition = {
   name: "",
 };
@@ -197,6 +206,9 @@ export default {
   },
   methods: {
     checkPermission,
+    getStatusText(status) {
+      return TRANSITION_ATTRIBUTE_TYPE[status];
+    },
     getList() {
       getWfTransitionList(this.ID).then((response) => {
         if (response.data) {
