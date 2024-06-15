@@ -786,7 +786,6 @@ export default {
     };
   },
   mounted() {
-    debugger;
     this.userId = sessionStorage.getItem("userId");
     this.workflow = this.$route.params.workflow;
     if (this.workflow) {
