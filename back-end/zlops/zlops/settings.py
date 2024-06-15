@@ -15,6 +15,9 @@ from . import config
 from pathlib import Path
 from datetime import datetime, timedelta
 
+# 邮件，接口信息等地方使用
+SYS_NAME = "zlOps"
+SYS_VERSION = "0.0.1"
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -86,11 +89,42 @@ WSGI_APPLICATION = "zlops.wsgi.application"
 
 # ASGI
 ASGI_APPLICATION = "zlops.asgi.application"
-CHANNEL_LAYERS = config.CHANNEL_LAYERS
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [
+                "redis://{user}:{pwd}@{address}:{port}/{db}".format(
+                    user=config.REDIS_USER,
+                    pwd=config.REDIS_PASSWORD,
+                    address=config.REDIS_ADDRESS,
+                    port=config.REDIS_PORT,
+                    db=config.REDIS_CHANNEL_DB,
+                )
+            ],
+            "symmetric_encryption_keys": [SECRET_KEY],
+            # "capacity": 1500,
+            # "expiry": 10,
+        },
+    },
+}
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-DATABASES = config.DATABASES
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.mysql",
+        "NAME": config.MYSQL_DB_NAME,
+        "USER": config.MYSQL_DB_USER,
+        "PASSWORD": config.MYSQL_DB_PASSWORD,
+        "HOST": config.MYSQL_DB_HOST,
+        "PORT": config.MYSQL_DB_PORT,
+        "OPTIONS": {
+            "autocommit": True,
+            "init_command": "SET sql_mode='STRICT_TRANS_TABLES'",
+        },
+    }
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -206,18 +240,42 @@ CORS_ALLOW_HEADERS = (
     "x-token",
     "token",
 )
+# 邮箱配置
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = config.EMAIL_HOST
+EMAIL_PORT = config.EMAIL_PORT
+EMAIL_HOST_USER = config.EMAIL_HOST_USER
+EMAIL_HOST_PASSWORD = config.EMAIL_HOST_PASSWORD
+EMAIL_USE_TLS = config.EMAIL_USE_TLS
 
 # Auth配置
 AUTH_USER_MODEL = "system.User"
 AUTHENTICATION_BACKENDS = ("apps.system.authentication.CustomBackend",)
 
 # 缓存设置（Redis）
-CACHES = config.CACHES
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": "redis://{user}:{pwd}@{address}:{port}/{db}".format(
+            user=config.REDIS_USER,
+            pwd=config.REDIS_PASSWORD,
+            address=config.REDIS_ADDRESS,
+            port=config.REDIS_PORT,
+            db=config.REDIS_CACHES_DB,
+        ),
+    }
+}
 
 
 # celery配置,celery正常运行必须安装redis
-CELERY_BROKER_URL = config.CELERY_BROKER_URL  # 任务存储
-CELERY_TASK_DEFAULT_QUEUE = config.CELERY_TASK_DEFAULT_QUEUE  # 任务队列
+CELERY_BROKER_URL = "redis://{user}:{pwd}@{address}:{port}/{db}".format(
+    user=config.REDIS_USER,
+    pwd=config.REDIS_PASSWORD,
+    address=config.REDIS_ADDRESS,
+    port=config.REDIS_PORT,
+    db=config.REDIS_CACHES_DB,
+)  # 任务存储
+CELERY_TASK_DEFAULT_QUEUE = config.BASE_PROJECT_CODE  # 任务队列
 CELERYD_MAX_TASKS_PER_CHILD = (
     100  # 每个worker最多执行100个任务就会被销毁，可防止内存泄露
 )
@@ -232,7 +290,7 @@ CELERY_RESULT_EXTENDED = True
 CELERY_TASK_TRACK_STARTED = True
 CELERYD_SOFT_TIME_LIMIT = 60 * 10
 # WORKER_PREFETCH_MULTIPLIER = 20 # WORKER预取任务数量
-CELERYD_CONCURRENCY = config.CELERY_WORKER_CONCURRENCY
+CELERYD_CONCURRENCY = os.cpu_count() # WORKER进程数,通常为CPU数, 或 *2
 CELERY_TASK_RESULT_EXPIRES = 60 * 60 * 24  # 结果存储有效时间
 
 # swagger配置
