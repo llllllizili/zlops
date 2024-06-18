@@ -76,7 +76,7 @@ class WorkflowViewSet(CreateUpdateModelAMixin, ModelViewSet):
     @action(
         methods=["get"],
         detail=True,
-        perms_map={"get": "workflow_update"},
+        perms_map={"get": "*"},
         pagination_class=None,
         serializer_class=StateSerializer,
     )
@@ -93,7 +93,7 @@ class WorkflowViewSet(CreateUpdateModelAMixin, ModelViewSet):
     @action(
         methods=["get"],
         detail=True,
-        perms_map={"get": "workflow_update"},
+        perms_map={"get": "*"},
         pagination_class=None,
         serializer_class=TransitionSerializer,
     )
@@ -159,9 +159,9 @@ class StateViewSet(
 ):
     perms_map = {
         "get": "*",
-        "post": "workflow_update",
-        "put": "workflow_update",
-        "delete": "workflow_update",
+        "post": "*",
+        "put": "*",
+        "delete": "*",
     }
     queryset = State.objects.all()
     serializer_class = StateSerializer
@@ -179,13 +179,13 @@ class TransitionViewSet(
 ):
     perms_map = {
         "get": "*",
-        "post": "workflow_update",
-        "put": "workflow_update",
-        "delete": "workflow_update",
+        "post": "*",
+        "put": "*",
+        "delete": "*",
     }
     queryset = Transition.objects.all()
     serializer_class = TransitionSerializer
-    search_fields = ["name"]
+    search_fields = ["name","id"]
     filterset_fields = ["workflow"]
     ordering = ["id"]
 
@@ -199,9 +199,9 @@ class CustomFieldViewSet(
 ):
     perms_map = {
         "get": "*",
-        "post": "workflow_update",
-        "put": "workflow_update",
-        "delete": "workflow_update",
+        "post": "*",
+        "put": "*",
+        "delete": "*",
     }
     queryset = CustomField.objects.all()
     serializer_class = CustomFieldSerializer
@@ -223,7 +223,13 @@ class TicketViewSet(
     RetrieveModelMixin,
     GenericViewSet,
 ):
-    perms_map = {"get": "*", "post": "ticket_create"}
+    perms_map = {"get": "*", "post": "*"}
+    # perms_map = {
+    #     "get": "*",
+    #     "post": "*",
+    #     "put": "*",
+    #     "delete": "*",
+    # }
     queryset = Ticket.objects.all()
     serializer_class = TicketSerializer
     search_fields = ["title"]
@@ -531,23 +537,33 @@ class TicketViewSet(
     @action(
         methods=["post"],
         detail=False,
-        perms_map={"post": "ticket_deletes"},
+        perms_map={"post": "*"},
         serializer_class=TicketDestorySerializer,
     )
     def destory(self, request, pk=None):
         """
-        批量物理删除
+        批量物理删除, 非创建人，无权删除
         """
-        Ticket.objects.filter(id__in=request.data.get("ids", [])).delete(soft=False)
-        return Response()
-
+        ids_data = request.data.get("ids", [])
+        tickets = Ticket.objects.filter(id__in=ids_data)
+        for ticket in tickets:
+            id = ticket.id
+            create_by = str(ticket.create_by)
+            if (create_by == str(request.user)):
+                Ticket.objects.filter(id=id).delete(soft=True)
+                return Response()
+            else:
+                return Response("无权限删除", status=status.HTTP_400_BAD_REQUEST)
 
 class TicketFlowViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
     """
     工单日志
     """
 
-    perms_map = {"get": "*"}
+    perms_map = {
+        "get": "*",
+        "post": "*",
+    }
     queryset = TicketFlow.objects.all()
     serializer_class = TicketFlowSerializer
     search_fields = ["suggestion"]

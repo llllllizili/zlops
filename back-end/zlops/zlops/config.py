@@ -8,6 +8,8 @@ import os
 
 # 基本配置
 DEBUG = os.getenv("DEBUG", True)
+# 系统运维管理人员，用于接收系统报错
+SYSTEM_MANAGER_EMAIL = os.getenv("SYSTEM_MANAGER_EMAIL", None)
 
 SECRET_KEY = "sk2lw67kei6cdmno"
 BASE_PROJECT_CODE = "zlops"  # 一旦配置不要变
@@ -31,9 +33,10 @@ REDIS_CACHES_DB = os.getenv("REDIS_CACHES_DB", 1)
 REDIS_CELERY_BROKER_DB = os.getenv("REDIS_CELERY_BROKER_DB", 2)
 REDIS_CHANNEL_DB = os.getenv("REDIS_CHANNEL_DB", 3)
 
-# 邮箱配置
+# 邮箱配置, 替换None或设置环境变量
 EMAIL_HOST = os.getenv("EMAIL_HOST", "smtp.qq.com")
 EMAIL_PORT = os.getenv("EMAIL_PORT", 587)  # 465
-EMAIL_HOST_USER = os.getenv("EMAIL_HOST_PASSWORD", None)
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", None)
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", None)
 EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", True)
+DEFAULT_EMAIL_RECIPIENT = os.getenv("DEFAULT_EMAIL_RECIPIENT", None)

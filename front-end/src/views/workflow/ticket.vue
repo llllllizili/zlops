@@ -887,7 +887,6 @@ export default {
       getWfTransitionList(this.addForm.workflow).then((res) => {
         for (let i = 0; i < res.data.length; i++) {
           if (res.data[i].source_state_.type === 1) {
-            debugger;
             this.addForm.transition = res.data[i].id;
           }
         }
@@ -915,7 +914,7 @@ export default {
             obj[fields[i].field_key] = fields[i].default_value;
           }
           this.addForm.ticket_data = obj;
-          debugger;
+          // debugger;
           console.log(this.addForm);
           createTicket(this.addForm).then((res) => {
             if (res.code >= 200) {
@@ -933,7 +932,7 @@ export default {
       this.limitedRetreat = false;
     },
     handleSubmit() {
-      debugger;
+      // debugger;
       if (this.handleTitle === "撤回工单") {
         this.$confirm("确认撤回工单吗?", "温馨提示", {
           confirmButtonText: "确认",
@@ -991,12 +990,12 @@ export default {
       let ticketId = scope.row.id;
       getWfFlowSteps(ticketId).then((res) => {
         if (res.data) {
-          debugger;
+          // debugger;
           //流程步骤数组
           that.flowSteps = res.data;
           getTicketDetail(ticketId).then((res) => {
             if (res.data) {
-              debugger;
+              // debugger;
               that.tooltip = that.createTooltip();
               that.ticketDetail = res.data;
               let state = res.data.state;
@@ -1060,7 +1059,7 @@ export default {
                       let transitionList = res.data;
                       transitionList.forEach((transitions) => {
                         let transition0 = transitions;
-                        debugger;
+                        // debugger;
                         console.log(transition0.condition_expression.length);
                         if (transition0.condition_expression.length > 0) {
                           g.setNode(transition0.source_state_.id + 100000, {
@@ -1154,13 +1153,13 @@ export default {
                               if (!filList.length) {
                                 return;
                               }
-                              debugger;
+                              // debugger;
                               console.log(filList);
                               filList.map((k) => {
                                 let filte = that.logs.filter((item) => {
                                   return item.state == k.id;
                                 });
-                                debugger;
+                                // debugger;
                                 console.log(filte);
                                 //每个
                                 let str =
@@ -1263,6 +1262,8 @@ export default {
         type: "warning",
       }).then(async () => {
         ticketDestory(data).then((res) => {
+          console.log("vue ticketDestory------")
+          console.log(data)
           if (res.code == 200) {
             this.getList();
           }

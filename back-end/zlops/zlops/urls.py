@@ -31,8 +31,8 @@ from django.views.generic import TemplateView
 
 schema_view = get_schema_view(
    openapi.Info(
-      title="zlOps API",
-      default_version='v1',
+      title=settings.SYS_NAME + " API",
+      default_version=settings.SYS_VERSION,
       contact=openapi.Contact(email=""),
     #   license=openapi.License(name="MIT License"),
    ),
