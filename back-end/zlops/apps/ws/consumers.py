@@ -35,7 +35,6 @@ class SystemConsumer(AsyncWebsocketConsumer):
         # Leave room group
         await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
         for group in self.groups:
-            print(group)
             await self.channel_layer.group_discard(group, self.channel_name)
         self.groups.clear()  # 清空集合
     async def receive(self, text_data):

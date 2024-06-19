@@ -495,7 +495,6 @@ def send_ticket_notice(ticket: Ticket):
     if ticket.participant_type == 1:
         # 发送邮件通知
         pt = User.objects.filter(id=ticket.participant).first()
-        print(pt)
         if pt and pt.email:
             send_mail_task.delay(
                 subject="工单提醒",
@@ -506,7 +505,6 @@ def send_ticket_notice(ticket: Ticket):
             )
     elif ticket.participant_type == 2:
         pts = User.objects.filter(id__in=ticket.participant)
-        print(pts)
         for i in pts:
             if i.email:
                 send_mail_task.delay(
