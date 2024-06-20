@@ -48,6 +48,7 @@ from rest_framework.exceptions import APIException, PermissionDenied
 from rest_framework import status
 from django.db.models import Count
 from .scripts import GetParticipants, HandleScripts
+from .tasks import send_mail_task
 
 
 # Create your views here.
@@ -185,7 +186,7 @@ class TransitionViewSet(
     }
     queryset = Transition.objects.all()
     serializer_class = TransitionSerializer
-    search_fields = ["name","id"]
+    search_fields = ["name", "id"]
     filterset_fields = ["workflow"]
     ordering = ["id"]
 
@@ -465,6 +466,19 @@ class TicketViewSet(
             participant=request.user,
             transition=None,
         )
+        if add_user.email:
+            send_mail_task.delay(
+                subject="工单加签提醒",
+                message="""
+                    工作流:{},
+                    标题:{},
+                    当前状态:{}""".format(
+                        ticket.workflow.name,
+                        ticket.title,
+                        ticket.state.name
+                    ),
+                recipient_list=[add_user.email],
+            )
         return Response()
 
     @action(
@@ -485,6 +499,7 @@ class TicketViewSet(
         ticket.save()
         # 更新流转记录
         suggestion = request.data.get("suggestion", "")  # 加签意见
+        
         TicketFlow.objects.create(
             ticket=ticket,
             state=ticket.state,
@@ -495,6 +510,21 @@ class TicketViewSet(
             participant=request.user,
             transition=None,
         )
+        # 邮件发起加签人，提醒已完成
+        participant = User.objects.get(pk=ticket.participant)
+        if participant.email:
+            send_mail_task.delay(
+                subject="工单加签完成",
+                message="""
+                    工作流:{},
+                    标题:{},
+                    当前状态:{}""".format(
+                        ticket.workflow.name,
+                        ticket.title,
+                        ticket.state.name
+                    ),
+                recipient_list=[participant.email],
+            )
         return Response()
 
     @action(
@@ -549,11 +579,12 @@ class TicketViewSet(
         for ticket in tickets:
             id = ticket.id
             create_by = str(ticket.create_by)
-            if (create_by == str(request.user)):
+            if create_by == str(request.user):
                 Ticket.objects.filter(id=id).delete(soft=True)
                 return Response()
             else:
                 return Response("无权限删除", status=status.HTTP_400_BAD_REQUEST)
+
 
 class TicketFlowViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
     """

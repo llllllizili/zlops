@@ -11,10 +11,9 @@ myLogger = logging.getLogger("log")
 
 @shared_task
 def send_mail_task(*args, **kwargs):
-    kwargs["subject"] = "{}:{}_{}_{}".format(
+    kwargs["subject"] = "{}:{}_{}".format(
         settings.SYS_NAME,
         settings.SYS_VERSION,
-        kwargs.get("type", None),
         kwargs.get("subject", "500"),
     )
     kwargs["from_email"] = kwargs.get("from_email", settings.EMAIL_HOST_USER)

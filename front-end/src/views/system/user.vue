@@ -159,12 +159,16 @@
         <el-form-item label="姓名" prop="name">
           <el-input v-model="user.name" placeholder="姓名" />
         </el-form-item>
+        <el-form-item label="邮箱" prop="email">
+          <el-input v-model="user.email" placeholder="邮箱" />
+        </el-form-item>
         <el-form-item label="账户" prop="username">
           <el-input v-model="user.username" placeholder="账户" />
         </el-form-item>
         <el-form-item label="密码" prop="password">
           <el-input v-model="user.password" placeholder="密码" />
         </el-form-item>
+
         <el-form-item label="所属部门" prop="dept">
           <treeselect v-model="user.dept" :multiple="false" :options="orgData" @select="handleSuperiorList" placeholder="所属部门"/>
         </el-form-item>
@@ -287,6 +291,7 @@ export default {
       rule1: {
         name: [{ required: true, message: "请输入姓名", trigger: "blur" }],
         username: [{ required: true, message: "请输入账号", trigger: "change" }],
+        email: [{ required: true, message: "请输入邮箱地址", trigger: "change" }],
         // password: [{ required: true, message: '请输入密码', trigger: 'change' }],
       },
       filterOrgText: "",
