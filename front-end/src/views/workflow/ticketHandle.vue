@@ -503,7 +503,7 @@
                 type="textarea"
                 :rows="3"
                 v-model="handleForm.suggestion"
-                placeholder="撤回原因"
+                placeholder=""
               />
             </el-form-item>
           </el-col>
@@ -564,7 +564,7 @@
     </el-dialog>
   </div>
 </template>
-<script src="https://d3js.org/d3.v4.min.js"></script>
+<script src="../../utils/d3.v4.min.js"></script>
 <script>
 import { getOrgAll } from "@/api/org";
 import { upUrl, upHeaders } from "@/api/file";
@@ -1037,6 +1037,10 @@ export default {
           });
         }
       });
+      this.limitedAdd = false;
+      // this.$nextTick(() => {
+      //   this.$router.go(0);
+      // });
     },
   },
 };

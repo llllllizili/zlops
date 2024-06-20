@@ -69,7 +69,7 @@
     </el-row>
   </div>
 </template>
-<script src="https://d3js.org/d3.v4.min.js"></script>
+<script src="../../utils/d3.v4.min.js"></script>
 <script>
   import {getOrgAll} from "@/api/org";
   import {upUrl, upHeaders} from "@/api/file";

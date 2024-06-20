@@ -6,7 +6,7 @@
         </svg>
     </div>
 </template>
-<script src="https://d3js.org/d3.v4.min.js"></script>
+<script src="../../utils/d3.v4.min.js"></script>
 <script>
     import dagreD3 from "dagre-d3";
     import * as d3 from "d3";
