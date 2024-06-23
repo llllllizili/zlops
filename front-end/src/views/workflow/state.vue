@@ -58,7 +58,7 @@
             <el-link
               v-if="checkPermission(['workflow_delete'])"
               type="danger"
-              @click="handleDeleteCustomfield(scope)"
+              @click="handleDelete(scope)"
               >删除
             </el-link>
           </template>
@@ -524,8 +524,7 @@ export default {
       this.wfstate = Object.assign({}, scope.row); // copy obj
       this.participants = this.wfstate.participant;
       this.participant = this.wfstate.participant;
-      /////
-      debugger;
+      // debugger;
       console.log(this.wfstate.state_fields);
       let arr = [];
       for (let pro in this.wfstate.state_fields) {
@@ -562,7 +561,7 @@ export default {
                 this.statusChange[i].value;
             }
           }
-          debugger;
+          // debugger;
           console.log(state_fields);
           this.wfstate.state_fields = state_fields;
           this.wfstate.participant =

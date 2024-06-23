@@ -344,7 +344,9 @@ class WfService(object):
 
         source_state = ticket.state
         source_ticket_data = ticket.ticket_data
-
+        
+        if transition.source_state != source_state:
+            raise APIException('非该工单节点状态下的流转')
         # 校验处理权限
         if not handler or not created:  # 没有处理人意味着系统触发不校验处理权限
             result = WfService.ticket_handle_permission_check(ticket, handler)
@@ -413,7 +415,7 @@ class WfService(object):
             ticket.act_state = Ticket.TICKET_ACT_STATE_BACK
 
         # 只更新必填和可选的字段
-        if not created:
+        if not created and transition.field_require_check:
             for key, value in source_state.state_fields.items():
                 if value in (State.STATE_FIELD_REQUIRED, State.STATE_FIELD_OPTIONAL):
                     if key in new_ticket_data:
@@ -469,16 +471,23 @@ class WfService(object):
         执行任务(自定义任务和通知)
         """
         state = ticket.state
-
+        print(state)
+        for attr, value in vars(ticket).items():
+            print(f"{attr}: {value}")
         # wf默认只发送通知
         last_log = (
             TicketFlow.objects.filter(ticket=ticket).order_by("-create_time").first()
         )
+        print(last_log)
+        for attr, value in vars(last_log).items():
+            print(f"{attr}: {value}")
+
         if (
             last_log.state != state
             or last_log.intervene_type == Transition.TRANSITION_INTERVENE_TYPE_DELIVER
             or ticket.in_add_node
         ):
+            print('--------------------------触发通知')
             # 如果状态变化或是转交加签的情况再发送通知
             Thread(target=send_ticket_notice, args=(ticket,), daemon=True).start()
 
@@ -491,26 +500,43 @@ def send_ticket_notice(ticket: Ticket):
     """
     发送通知
     """
-    params = {"workflow": ticket.workflow.name, "state": ticket.state.name}
+    # params = {"workflow": ticket.workflow.name, "state": ticket.state.name}
     if ticket.participant_type == 1:
+        print("pt.email 11111")
         # 发送邮件通知
         pt = User.objects.filter(id=ticket.participant).first()
         if pt and pt.email:
+            print(pt.email)
             send_mail_task.delay(
                 subject="工单提醒",
-                message="工作流:{},当前状态:{}".format(
-                    ticket.workflow.name, ticket.state.name
-                ),
-                 recipient_list=[pt.email],
+                message="""
+                    工作流:{},
+                    问题: {},
+                    当前状态:{},
+                    """.format(
+                        ticket.workflow.name,
+                        ticket.title,
+                        ticket.state.name,
+                    ),
+                recipient_list=[pt.email],
             )
     elif ticket.participant_type == 2:
         pts = User.objects.filter(id__in=ticket.participant)
+        print("i.mail 22222")
         for i in pts:
             if i.email:
+                print(i.email)
                 send_mail_task.delay(
                     subject="工单提醒",
-                    message="工作流:{},当前状态:{}".format(
-                        ticket.workflow.name, ticket.state.name
-                    ),
+                    message="""
+                        工作流:{},
+                        问题: {},
+                        当前状态:{},
+                        """.format(
+                            ticket.workflow.name,
+                            ticket.title,
+                            ticket.state.name,
+                            
+                        ),
                     recipient_list=[i.email],
                 )

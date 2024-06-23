@@ -62,7 +62,7 @@
         :rules="rule1"
       >
         <el-form-item label="字段标识" prop="field_key">
-          <el-input v-model="customfield.field_key" placeholder="字段标识" />
+          <el-input v-model="customfield.field_key" placeholder="英文字母、下划线" />
         </el-form-item>
         <el-form-item label="字段名称" prop="field_name">
           <el-input v-model="customfield.field_name" placeholder="字段名称" />
@@ -282,7 +282,9 @@ export default {
       dialogVisible: false,
       dialogType: "new",
       rule1: {
-        name: [{ required: true, message: "请输入", trigger: "blur" }],
+        field_key: [{ required: true, message: "请输入", trigger: "blur" }],
+        field_name: [{ required: true, message: "请输入", trigger: "blur" }],
+        field_type: [{ required: true, message: "请输入", trigger: "blur" }],
         description: [{ required: true, message: "请输入", trigger: "blur" }],
       },
     };
@@ -341,28 +343,6 @@ export default {
           this.$refs["Form"].clearValidate();
         });*/
     },
-    handlecfgt(scope) {
-      this.$router.push({
-        name: "configuration",
-        params: { customfield: scope.row.id },
-      });
-    },
-    handleDelete(scope) {
-      this.$confirm("确认删除?", "警告", {
-        confirmButtonText: "确认",
-        cancelButtonText: "取消",
-        type: "error",
-      })
-        .then(async () => {
-          await this.deleteWorkflow(scope.row.id);
-          this.getList();
-          this.$message.success("成功");
-        })
-        .catch((err) => {
-          console.error(err);
-        });
-    },
-
     async confirm(form) {
       let that = this,
         choiceArr = [];

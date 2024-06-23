@@ -270,41 +270,43 @@ class TicketViewSet(
         save_ticket_data = {}
         # 校验必填项
         if transition.field_require_check:
+            save_ticket_data = ticket_data
             for key, value in start_state.state_fields.items():
-                if not value:
-                    continue
                 if int(value) == State.STATE_FIELD_REQUIRED:
                     if key not in ticket_data and not ticket_data[key]:
+                        print("字段{}必填".format(key))
                         raise APIException("字段{}必填".format(key))
                     save_ticket_data[key] = ticket_data[key]
                 elif int(value) == State.STATE_FIELD_OPTIONAL:
                     save_ticket_data[key] = ticket_data[key]
-
-        ticket = serializer.save(
-            state=start_state,
-            create_by=request.user,
-            create_time=timezone.now(),
-            act_state=Ticket.TICKET_ACT_STATE_DRAFT,
-            belong_dept=request.user.dept,
-            ticket_data=save_ticket_data,
-        )  # 先创建出来
-        # 更新title和sn
-        title = vdata.get("title", "")
-        title_template = ticket.workflow.title_template
-        if title_template:
-            all_ticket_data = {**rdata, **ticket_data}
-            title = title_template.format(**all_ticket_data)
-        sn = WfService.get_ticket_sn(ticket.workflow)  # 流水号
-        ticket.sn = sn
-        ticket.title = title
-        ticket.save()
-        ticket = WfService.handle_ticket(
-            ticket=ticket,
-            transition=transition,
-            new_ticket_data=ticket_data,
-            handler=request.user,
-            created=True,
-        )
+        else:
+            save_ticket_data = ticket_data
+        with transaction.atomic():
+            ticket = serializer.save(
+                state=start_state,
+                create_by=request.user,
+                create_time=timezone.now(),
+                act_state=Ticket.TICKET_ACT_STATE_DRAFT,
+                belong_dept=request.user.dept,
+                ticket_data=save_ticket_data,
+            )  # 先创建出来
+            # 更新title和sn
+            title = vdata.get("title", "")
+            title_template = ticket.workflow.title_template
+            if title_template:
+                all_ticket_data = {**rdata, **ticket_data}
+                title = title_template.format(**all_ticket_data)
+            sn = WfService.get_ticket_sn(ticket.workflow)  # 流水号
+            ticket.sn = sn
+            ticket.title = title
+            ticket.save()
+            ticket = WfService.handle_ticket(
+                ticket=ticket,
+                transition=transition,
+                new_ticket_data=ticket_data,
+                handler=request.user,
+                created=True,
+            )
         return Response(TicketSerializer(instance=ticket).data)
 
     @action(methods=["get"], detail=False, perms_map={"get": "*"})

@@ -475,7 +475,12 @@
                 scope.row.participant_.name
               }}</template>
             </el-table-column>
-            <el-table-column label="操作意见" min-width="100" prop="suggestion">
+            <el-table-column label="操作意见" min-width="100">
+              <template slot-scope="scope">
+                <!-- 检查 scope.row.suggestion 是否为空值 -->
+                <span v-if="scope.row.suggestion">{{ scope.row.suggestion }}</span>
+                <span v-else>接单中</span>
+              </template>
             </el-table-column>
             <el-table-column
               label="更新时间"

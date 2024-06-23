@@ -340,6 +340,7 @@ class CustomField(CommonAModel):
         max_length=1000,
         default="",
         help_text="处理特殊逻辑使用,比如sys_user用于获取用户作为选项",
+        null=True, blank=True
     )
     # hook = models.CharField('hook', max_length=1000, default='', help_text='获取下拉选项用于动态选项值')
     is_hidden = models.BooleanField(
