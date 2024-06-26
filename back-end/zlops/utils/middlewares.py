@@ -1,5 +1,8 @@
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from asgiref.sync import sync_to_async
+import logging
+
+myLogger = logging.getLogger("log")
 
 @sync_to_async
 def _get_user(token: str):
@@ -18,7 +21,7 @@ class TokenAuthMiddleware:
         token = parse_qs(str(scope["query_string"], 'UTF-8')).get('token', [None])[0]
         if token:
             user = await _get_user(token)
-            print("current user is {}".format(user))
+            myLogger.debug("current user is {}".format(user))
             if user:
                 scope['user'] = user
                 return await self.app(scope, receive, send)

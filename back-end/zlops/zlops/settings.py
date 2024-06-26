@@ -326,6 +326,9 @@ LOGGING = {
         "require_debug_true": {
             "()": "django.utils.log.RequireDebugTrue",
         },
+        'require_debug_false': {  # 和上面相反
+            '()': 'django.utils.log.RequireDebugFalse',
+        },
     },
     # 定义具体处理日志的方式
     "handlers": {
@@ -384,7 +387,7 @@ LOGGING = {
         # log 调用时需要当作参数传入
         "log": {
             "handlers": ["error", "info", "console", "default"],
-            "level": "ERROR",
+            "level": "DEBUG",
             "propagate": True,
         },
     },

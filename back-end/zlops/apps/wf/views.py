@@ -274,7 +274,6 @@ class TicketViewSet(
             for key, value in start_state.state_fields.items():
                 if int(value) == State.STATE_FIELD_REQUIRED:
                     if key not in ticket_data and not ticket_data[key]:
-                        print("字段{}必填".format(key))
                         raise APIException("字段{}必填".format(key))
                     save_ticket_data[key] = ticket_data[key]
                 elif int(value) == State.STATE_FIELD_OPTIONAL:
